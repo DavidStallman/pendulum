@@ -48,7 +48,7 @@ if __name__ == '__main__':
       read
       abs < distance in CM>
       rel < distance in CM>
-      home"""
+      home""")
   else:
     if 'silent' not in sys.argv[1]:
       print('Welcome to the target mover')

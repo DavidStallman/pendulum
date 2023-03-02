@@ -32,15 +32,19 @@ class Encoder:
 
     def __init__(self) -> None:
         
-        self.ljack = u6.U6()  # Opens first found U3 over USB
+        ljack = u6.U6()  # Opens first found U3 over USB
 
-        self.write_as5600_register(self.ljack, 0x01, 0)
-        self.write_as5600_register(self.ljack, 0x02, 0)
-        self.write_as5600_register(self.ljack, 0x03, 0)
-        self.write_as5600_register(self.ljack, 0x04, 0)
+        if FLAGS.clear:
+            print('Clearing')
+            write_as5600_register(ljack, 0x01, 0)
+            write_as5600_register(ljack, 0x02, 0)
+            write_as5600_register(ljack, 0x03, 0)
+            write_as5600_register(ljack, 0x04, 0)
+
+        
 
 
-    def read_as5600_registers(self):
+    def read_as5600_registers(self, ljack):
         """ Read all readable registers.
 
         32 bytes read.
@@ -59,8 +63,8 @@ class Encoder:
         """
         
         i2cbytes = [0 & 0xFF]
-        self.ljack.i2c(AS5600_ADDR, i2cbytes, NumI2CBytesToReceive=0)
-        ret = self.ljack.i2c(AS5600_ADDR, [], NumI2CBytesToReceive=32)
+        ljack.i2c(AS5600_ADDR, i2cbytes, NumI2CBytesToReceive=0)
+        ret = ljack.i2c(AS5600_ADDR, [], NumI2CBytesToReceive=32)
         i2cbytes = ret['I2CBytes']
         return i2cbytes
 
@@ -77,13 +81,12 @@ class Encoder:
         ljack.i2c(AS5600_ADDR, i2cbytes, NumI2CBytesToReceive=0)
         return
 
-    def set_zero(self):
-        registers = self.read_as5600_registers()
-        self.write_as5600_register(self.ljack, 0x01, registers[0x0C])
-        self.write_as5600_register(self.ljack, 0x02, registers[0x0D])
+    def set_zero(self, ljack):
+        registers = read_as5600_registers(ljack)
+        write_as5600_register(ljack, 0x01, registers[0x0C])
+        write_as5600_register(ljack, 0x02, registers[0x0D])
 
-    def get_angle(self):
-        registers = self.read_as5600_registers()
+    def get_angle(self, ljack):
         return (registers[0x0E] & 0x0F)*256 + registers[0x0F]
 
     def cleanup(self, doit):
